@@ -18,6 +18,7 @@
         <td>{{ $merchandise->harga }}</td>
         <td>{{ $merchandise->stok }}</td>
         <td>
+            <a href="{{ route('merchandises.show', $merchandise->id) }}">Detail</a>
             <a href="{{ route('merchandises.edit', $merchandise->id) }}">Edit</a>
 
             <form action="{{ route('merchandises.destroy', $merchandise->id) }}" method="POST" style="display:inline;">

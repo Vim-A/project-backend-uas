@@ -12,7 +12,8 @@ class MerchandiseController extends Controller
      */
     public function index()
     {
-        //
+    $merchandises = Merchandise::all();
+    return view('merchandises.index', compact('merchandises'));
     }
 
     /**
@@ -20,7 +21,7 @@ class MerchandiseController extends Controller
      */
     public function create()
     {
-        //
+    return view('merchandises.create');
     }
 
     /**
@@ -28,7 +29,15 @@ class MerchandiseController extends Controller
      */
     public function store(Request $request)
     {
-        //
+    Merchandise::create([
+        'nama_merchandise' => $request->nama_merchandise,
+        'kategori' => $request->kategori,
+        'harga' => $request->harga,
+        'stok' => $request->stok,
+        'deskripsi' => $request->deskripsi,
+        ]);
+
+        return redirect()->route('merchandises.index');
     }
 
     /**
@@ -36,7 +45,7 @@ class MerchandiseController extends Controller
      */
     public function show(Merchandise $merchandise)
     {
-        //
+    return view('merchandises.show', compact('merchandise'));
     }
 
     /**
@@ -44,7 +53,7 @@ class MerchandiseController extends Controller
      */
     public function edit(Merchandise $merchandise)
     {
-        //
+    return view('merchandises.edit', compact('merchandise'));
     }
 
     /**
@@ -52,7 +61,15 @@ class MerchandiseController extends Controller
      */
     public function update(Request $request, Merchandise $merchandise)
     {
-        //
+    $merchandise->update([
+            'nama_merchandise' => $request->nama_merchandise,
+            'kategori' => $request->kategori,
+            'harga' => $request->harga,
+            'stok' => $request->stok,
+            'deskripsi' => $request->deskripsi,
+        ]);
+
+        return redirect()->route('merchandises.index');
     }
 
     /**
@@ -60,6 +77,7 @@ class MerchandiseController extends Controller
      */
     public function destroy(Merchandise $merchandise)
     {
-        //
+    $merchandise->delete();
+        return redirect()->route('merchandises.index');
     }
 }
