@@ -10,11 +10,15 @@ return new class extends Migration
      * Run the migrations.
      */
     public function up(): void
-    {
-        Schema::create('penggunas', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
-        });
+{
+    Schema::create('penggunas', function (Blueprint $table) {
+        $table->id();
+        $table->string('nama');
+        $table->string('gmail')->unique();
+        $table->string('password');
+        $table->string('nik')->unique();
+        $table->timestamps();
+    });
     }
 
     /**
