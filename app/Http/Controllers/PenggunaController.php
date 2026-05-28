@@ -43,7 +43,7 @@ class PenggunaController extends Controller
             'pengguna_nama' => $pengguna->nama,
         ]);
 
-        return redirect()->route('schedules.index');
+        return redirect()->route('schedule.index');
     }
 
     public function forgotPassword()

@@ -11,6 +11,17 @@ Route::get('/', function () {
     return redirect()->route('pengguna.login');
 });
 
+Route::get('/register', [PenggunaController::class, 'register'])->name('pengguna.register');
+Route::post('/register', [PenggunaController::class, 'prosesRegister'])->name('pengguna.prosesRegister');
+
+Route::get('/login', [PenggunaController::class, 'login'])->name('pengguna.login');
+Route::post('/login', [PenggunaController::class, 'prosesLogin'])->name('pengguna.prosesLogin');
+
+Route::get('/forgot-password', [PenggunaController::class, 'forgotPassword'])->name('pengguna.forgotPassword');
+Route::post('/forgot-password', [PenggunaController::class, 'prosesForgotPassword'])->name('pengguna.prosesForgotPassword');
+
+Route::post('/logout', [PenggunaController::class, 'logout'])->name('pengguna.logout');
+
 Route::resource('tickets', TicketController::class);
 Route::resource('booking', BookingController::class);
 Route::resource('pengguna', PenggunaController::class);
