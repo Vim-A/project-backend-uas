@@ -10,6 +10,7 @@ use App\Http\Controllers\ConcertController;
 use App\Http\Controllers\ArtistController;
 use App\Http\Controllers\VenueController;
 use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\PaymentController;
 
 Route::get('/', function () {
     return redirect()->route('pengguna.login');
@@ -35,4 +36,5 @@ Route::resource('concerts', ConcertController::class);
 Route::resource('artists', ArtistController::class);
 Route::resource('venues', VenueController::class);
 Route::resource('reviews', ReviewController::class);
+Route::resource('payments', PaymentController::class);
 ?>
