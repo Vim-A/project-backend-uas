@@ -23,7 +23,7 @@ return new class extends Migration
                 ->nullOnDelete();
 
             $table->date('tanggal_konser');
-            substr($booking->ticket->jam_konser, 0, 5);
+            $table->time('jam_konser');
 
             $table->integer('harga');
             $table->integer('stock');
