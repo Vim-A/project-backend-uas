@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Schedule;
+use App\Models\Ticket;
 use Illuminate\Http\Request;
 
 class ScheduleController extends Controller
@@ -12,12 +13,15 @@ class ScheduleController extends Controller
      */
     public function index()
     {
-    $schedules = Ticket::with(['concert.artists', 'venue'])
+        $schedules = Ticket::with(['concert.artists', 'venue'])
             ->orderBy('tanggal_konser')
             ->orderBy('jam_konser')
             ->get()
             ->groupBy(function ($ticket) {
-                return $ticket->concert_id . '-' . $ticket->venue_id . '-' . $ticket->tanggal_konser . '-' . $ticket->jam_konser;
+                return $ticket->concert_id . '-' .
+                       $ticket->venue_id . '-' .
+                       $ticket->tanggal_konser . '-' .
+                       $ticket->jam_konser;
             })
             ->map(function ($group) {
                 $jadwal = $group->first();
@@ -31,7 +35,6 @@ class ScheduleController extends Controller
             ->values();
 
         return view('schedules.index', compact('schedules'));
-    }
     }
 
     /**
