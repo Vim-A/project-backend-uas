@@ -48,13 +48,13 @@ Route::get('/schedule', [ScheduleController::class, 'index'])->name('schedule.in
 
 Route::resource('tickets', TicketController::class);
 Route::resource('booking', BookingController::class);
+Route::apiResource('concerts', ConcertController::class);
+Route::apiResource('artists', ArtistController::class);
 Route::resource('pengguna', PenggunaController::class);
 Route::resource('customer-service', CustomerServiceController::class);
-Route::resource('concerts', ConcertController::class);
-Route::resource('artists', ArtistController::class);
 Route::resource('wishlist', WishlistController::class);
 Route::resource('venues', VenueController::class);
 Route::resource('reviews', ReviewController::class);
 Route::resource('payments', PaymentController::class);
-Route::resource('galleries', GalleryController::class);
+Route::resource('gallery', GalleryController::class);
 ?>
