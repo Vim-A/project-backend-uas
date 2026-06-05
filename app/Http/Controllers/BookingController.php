@@ -8,77 +8,95 @@ use Illuminate\Http\Request;
 
 class BookingController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    private function requireLogin()
+    {
+        if (!session('pengguna_id')) {
+            return redirect()->route('pengguna.login')->with('error', 'Login dulu sebelum booking tiket.');
+        }
+
+        return null;
+    }
+
     public function index()
     {
-        $booking = Booking::all();
+        $query = Booking::with(['ticket.concert.artists', 'ticket.venue'])->latest();
+
+        if (session('pengguna_role') !== 'admin') {
+            $query->where('user_id', session('pengguna_id'));
+        }
+
+        $booking = $query->get();
+
         return view('booking.index', compact('booking'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        $tickets = Ticket::all();
+        if ($redirect = $this->requireLogin()) {
+            return $redirect;
+        }
+
+        $tickets = Ticket::with(['concert.artists', 'venue'])
+            ->where('stock', '>', 0)
+            ->orderBy('tanggal_konser')
+            ->orderBy('jam_konser')
+            ->get();
+
         return view('booking.create', compact('tickets'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        $ticket = Ticket::find($request->ticket_id);
+        if ($redirect = $this->requireLogin()) {
+            return $redirect;
+        }
+
+        $validated = $request->validate([
+            'ticket_id' => 'required|exists:tickets,id',
+            'kuantitas' => 'required|integer|min:1',
+        ]);
+
+        $ticket = Ticket::findOrFail($validated['ticket_id']);
+
+        if ($validated['kuantitas'] > $ticket->stock) {
+            return redirect()->back()->with('error', 'Jumlah tiket melebihi stok yang tersedia.');
+        }
 
         Booking::create([
-            'user_id' => auth()->id(),
+            'user_id' => session('pengguna_id'),
             'ticket_id' => $ticket->id,
-            'nama_konser' => $ticket->nama_konser,
-            'nama_artis' => $ticket->nama_artis,
-            'venue' => $ticket->venue,
-            'tanggal_konser' => $ticket->tanggal_konser,
-            'jam_konser' => $ticket->jam_konser,
-            'tipe_ticket' => $ticket->tipe_ticket,
-            'kuantitas' => $request->kuantitas,
-            'total_harga' => $ticket->harga * $request->kuantitas,
+            'kuantitas' => $validated['kuantitas'],
+            'total_harga' => $ticket->harga * $validated['kuantitas'],
             'status' => 'pending',
         ]);
 
-        return redirect('/booking');
+        $ticket->decrement('stock', $validated['kuantitas']);
+
+        return redirect()->route('booking.index')->with('success', 'Booking berhasil dibuat.');
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(string $id)
     {
-        //
+        $booking = Booking::with(['ticket.concert.artists', 'ticket.venue'])->findOrFail($id);
+
+        return view('booking.show', compact('booking'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(string $id)
     {
-        //
+        return redirect()->route('booking.index');
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, string $id)
     {
-        //
+        return redirect()->route('booking.index');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(string $id)
     {
-        //
+        $booking = Booking::findOrFail($id);
+        $booking->delete();
+
+        return redirect()->route('booking.index')->with('success', 'Booking berhasil dihapus.');
     }
 }
