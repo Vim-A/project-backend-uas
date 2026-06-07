@@ -13,6 +13,11 @@ return new class extends Migration
     {
         Schema::create('booking_refunds', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('booking_id');
+            $table->unsignedBigInteger('pengguna_id')->nullable();
+            $table->text('alasan');
+            $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
+            $table->text('catatan_admin')->nullable();
             $table->timestamps();
         });
     }
