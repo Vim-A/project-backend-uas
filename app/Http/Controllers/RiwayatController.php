@@ -2,12 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Models\Booking;
 
 class RiwayatController extends Controller
 {
     public function index()
     {
-        return view('riwayat.index');
+        $riwayats = Booking::with(['ticket.venue', 'refund'])
+            ->latest()
+            ->get();
+
+        return view('riwayat.index', compact('riwayats'));
     }
 }
