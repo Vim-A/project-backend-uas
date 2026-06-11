@@ -55,3 +55,45 @@
         font-size: 14px;
         margin-top: 12px;
     }
+    
+    .btn-primary {
+        background: #ef4765;
+        color: white;
+    }
+
+    .btn-soft {
+        background: #eef3ff;
+        color: #0f234a;
+        border: 1px solid #b7c7f0;
+    }
+</style>
+
+<div class="refund-page">
+    <div class="refund-form">
+        <h1>Ajukan Refund</h1>
+
+        <div class="info-box">
+            <p><strong>Konser:</strong> {{ $booking->ticket->nama_konser ?? '-' }}</p>
+            <p><strong>Tipe Tiket:</strong> {{ $booking->ticket->tipe_ticket ?? '-' }}</p>
+            <p><strong>Jumlah:</strong> {{ $booking->kuantitas }}</p>
+            <p><strong>Total Harga:</strong> Rp{{ number_format($booking->total_harga, 0, ',', '.') }}</p>
+            <p><strong>Status Booking:</strong> {{ $booking->status }}</p>
+        </div>
+
+        <form action="{{ route('booking-refund.store') }}" method="POST">
+            @csrf
+
+            <input type="hidden" name="booking_id" value="{{ $booking->id }}">
+
+            <label>Alasan Refund</label>
+            <br><br>
+            <textarea name="alasan" placeholder="Tulis alasan refund..." required>{{ old('alasan') }}</textarea>
+
+            <br>
+
+            <button type="submit" class="btn btn-primary">Kirim Refund</button>
+            <a href="{{ route('riwayat.index') }}" class="btn btn-soft">Batal</a>
+        </form>
+    </div>
+</div>
+@endsection
