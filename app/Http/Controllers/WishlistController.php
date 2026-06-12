@@ -23,7 +23,7 @@ class WishlistController extends Controller
 
     public function store(Request $request)
     {
-    if (!session('pengguna_id')) {
+        if (!session('pengguna_id')) {
             return redirect()->route('pengguna.login');
         }
 
@@ -38,9 +38,19 @@ class WishlistController extends Controller
 
         return redirect()->back()->with('success', 'Konser berhasil ditambahkan ke wishlist.');
     }
-    
+
     public function destroy($id)
     {
+        if (!session('pengguna_id')) {
+            return redirect()->route('pengguna.login');
+        }
 
+        $wishlist = Wishlist::where('id', $id)
+            ->where('pengguna_id', session('pengguna_id'))
+            ->firstOrFail();
+
+        $wishlist->delete();
+
+        return redirect()->back()->with('success', 'Konser berhasil dihapus dari wishlist.');
     }
 }
