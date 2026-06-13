@@ -15,6 +15,7 @@ use App\Http\Controllers\VenueController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\GalleryController;
+use App\Http\Controllers\BookingRefundController;
 
 
 // Homepagenya
@@ -57,4 +58,11 @@ Route::resource('venues', VenueController::class);
 Route::resource('reviews', ReviewController::class);
 Route::resource('payments', PaymentController::class);
 Route::resource('gallery', GalleryController::class);
+
+Route::get('/booking-refund', [BookingRefundController::class, 'index'])->name('booking-refund.index');
+Route::get('/booking-refund/create', [BookingRefundController::class, 'create'])->name('booking-refund.create');
+Route::post('/booking-refund', [BookingRefundController::class, 'store'])->name('booking-refund.store');
+Route::post('/booking-refund/{id}/approve', [BookingRefundController::class, 'approve'])->name('booking-refund.approve');
+Route::post('/booking-refund/{id}/reject', [BookingRefundController::class, 'reject'])->name('booking-refund.reject');
+Route::delete('/booking-refund/{id}', [BookingRefundController::class, 'destroy'])->name('booking-refund.destroy');
 ?>
