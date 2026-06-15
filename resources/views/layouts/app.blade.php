@@ -406,6 +406,7 @@
 
             <div class="navbar-menu">
                 <a href="{{ route('home') }}">Home</a>
+                <a href="{{ route('concerts.index') }}">Concert</a>
                 <a href="{{ route('schedule.index') }}">Schedule</a>
                 <a href="{{ route('tickets.index') }}">Ticket</a>
                 <a href="{{ route('booking.index') }}">Booking</a>
