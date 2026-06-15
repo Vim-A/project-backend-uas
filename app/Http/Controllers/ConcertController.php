@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Artist;
 use App\Models\Concert;
 use Illuminate\Http\Request;
 
@@ -9,50 +10,111 @@ class ConcertController extends Controller
 {
     public function index()
     {
-        $concerts = Concert::with('artists')->get();
-        return response()->json($concerts);
+        $concerts = Concert::with(['artists', 'tickets.venue'])
+            ->orderBy('event_date')
+            ->get();
+
+        return view('concerts.index', compact('concerts'));
     }
 
-    public function show($id)
+    public function create()
     {
-        $concert = Concert::with('artists')->findOrFail($id);
-        return response()->json($concert);
+        if (session('pengguna_role') !== 'admin') {
+            return redirect()->route('concerts.index')->with('error', 'Akses hanya untuk admin.');
+        }
+
+        $artists = Artist::orderBy('name')->get();
+
+        return view('concerts.create', compact('artists'));
     }
 
     public function store(Request $request)
     {
+        if (session('pengguna_role') !== 'admin') {
+            return redirect()->route('concerts.index')->with('error', 'Akses hanya untuk admin.');
+        }
+
         $request->validate([
-            'name'       => 'required|string|max:255',
-            'event_date' => 'required|date',
-            'description'=> 'nullable|string',
-            'poster_url' => 'nullable|string|max:255',
-            'status'     => 'in:upcoming,ongoing,finished',
+            'name'        => 'required|string|max:255',
+            'artist_id'   => 'required|exists:artists,id',
+            'event_date'  => 'required|date',
+            'description' => 'nullable|string',
+            'poster_url'  => 'nullable|string|max:255',
+            'status'      => 'required|in:upcoming,ongoing,finished',
         ]);
 
-        $concert = Concert::create($request->all());
-        return response()->json($concert, 201);
+        $concert = Concert::create([
+            'name'        => $request->name,
+            'description' => $request->description,
+            'poster_url'  => $request->poster_url,
+            'event_date'  => $request->event_date,
+            'status'      => $request->status,
+        ]);
+
+        $concert->artists()->sync([$request->artist_id]);
+
+        return redirect()->route('concerts.index')->with('success', 'Data konser berhasil ditambahkan.');
+    }
+
+    public function show($id)
+    {
+        $concert = Concert::with(['artists', 'tickets.venue', 'galleries'])
+            ->findOrFail($id);
+
+        return view('concerts.show', compact('concert'));
+    }
+
+    public function edit($id)
+    {
+        if (session('pengguna_role') !== 'admin') {
+            return redirect()->route('concerts.index')->with('error', 'Akses hanya untuk admin.');
+        }
+
+        $concert = Concert::with('artists')->findOrFail($id);
+        $artists = Artist::orderBy('name')->get();
+
+        return view('concerts.edit', compact('concert', 'artists'));
     }
 
     public function update(Request $request, $id)
     {
+        if (session('pengguna_role') !== 'admin') {
+            return redirect()->route('concerts.index')->with('error', 'Akses hanya untuk admin.');
+        }
+
         $concert = Concert::findOrFail($id);
 
         $request->validate([
-            'name'        => 'sometimes|string|max:255',
-            'event_date'  => 'sometimes|date',
-            'description' => 'sometimes|nullable|string',
-            'poster_url'  => 'sometimes|nullable|string|max:255',
-            'status'      => 'sometimes|in:upcoming,ongoing,finished',
+            'name'        => 'required|string|max:255',
+            'artist_id'   => 'required|exists:artists,id',
+            'event_date'  => 'required|date',
+            'description' => 'nullable|string',
+            'poster_url'  => 'nullable|string|max:255',
+            'status'      => 'required|in:upcoming,ongoing,finished',
         ]);
 
-        $concert->update($request->all());
-        return response()->json($concert);
+        $concert->update([
+            'name'        => $request->name,
+            'description' => $request->description,
+            'poster_url'  => $request->poster_url,
+            'event_date'  => $request->event_date,
+            'status'      => $request->status,
+        ]);
+
+        $concert->artists()->sync([$request->artist_id]);
+
+        return redirect()->route('concerts.index')->with('success', 'Data konser berhasil diperbarui.');
     }
 
     public function destroy($id)
     {
+        if (session('pengguna_role') !== 'admin') {
+            return redirect()->route('concerts.index')->with('error', 'Akses hanya untuk admin.');
+        }
+
         $concert = Concert::findOrFail($id);
         $concert->delete();
-        return response()->json(['message' => 'Concert deleted successfully']);
+
+        return redirect()->route('concerts.index')->with('success', 'Data konser berhasil dihapus.');
     }
 }

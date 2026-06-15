@@ -49,7 +49,7 @@ Route::get('/schedule', [ScheduleController::class, 'index'])->name('schedule.in
 
 Route::resource('tickets', TicketController::class);
 Route::resource('booking', BookingController::class);
-Route::apiResource('concerts', ConcertController::class);
+Route::resource('concerts', ConcertController::class);
 Route::apiResource('artists', ArtistController::class);
 Route::resource('pengguna', PenggunaController::class);
 Route::resource('customer-service', CustomerServiceController::class);
