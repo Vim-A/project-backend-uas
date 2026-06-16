@@ -59,7 +59,7 @@ class TicketController extends Controller
             'jam_konser' => 'required',
             'harga' => 'required|integer|min:0',
             'stock' => 'required|integer|min:0',
-            'tipe_ticket' => 'required|in:Regular,VIP',
+            'tipe_ticket' => 'required|in:Reguler,Festival,VIP'
         ]);
 
         $concert = Concert::with('artists')->findOrFail($validated['concert_id']);
