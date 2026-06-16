@@ -9,7 +9,7 @@ class RiwayatController extends Controller
     public function index()
     {
         $riwayats = Booking::with(['ticket.venue', 'refund'])
-            ->latest()
+            ->orderBy('id', 'desc')
             ->get();
 
         return view('riwayat.index', compact('riwayats'));
