@@ -13,6 +13,11 @@ return new class extends Migration
     {
         Schema::create('schedules', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('ticket_id')
+                ->constrained('tickets')
+                ->cascadeOnDelete();
+
+            $table->string('catatan')->nullable();
             $table->timestamps();
         });
     }
