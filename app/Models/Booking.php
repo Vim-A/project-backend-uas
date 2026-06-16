@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 class Booking extends Model
 {
     protected $fillable = [
-        'user_id',
         'ticket_id',
         'kuantitas',
         'total_harga',
@@ -17,5 +16,10 @@ class Booking extends Model
     public function ticket()
     {
         return $this->belongsTo(Ticket::class);
+    }
+
+    public function refund()
+    {
+        return $this->hasOne(BookingRefund::class);
     }
 }
