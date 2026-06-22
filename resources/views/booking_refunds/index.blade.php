@@ -3,193 +3,100 @@
 @section('title', 'Booking Refund')
 
 @section('content')
-<style>
-    .refund-page {
-        min-height: calc(100vh - 70px);
-        background: radial-gradient(circle at center, #4b5f9a 0%, #2d3d63 45%, #17243b 100%);
-        padding: 70px 0 140px;
-    }
-
-    .refund-wrapper {
-        width: 78%;
-        margin: 0 auto;
-        background: white;
-        border-radius: 16px;
-        padding: 26px;
-    }
-
-    .refund-header {
-        display: flex;
-        justify-content: space-between;
-        gap: 20px;
-        align-items: center;
-        margin-bottom: 20px;
-    }
-
-    .refund-header h1 {
-        margin: 0;
-        color: #111827;
-    }
-
-    .refund-header p {
-        margin: 6px 0 0;
-        color: #5c6680;
-    }
-
-    .refund-card {
-        border: 1px solid #d7def0;
-        border-radius: 14px;
-        padding: 18px;
-        margin-bottom: 14px;
-    }
-
-    .refund-card h3 {
-        margin: 0 0 6px;
-        color: #111827;
-    }
-
-    .refund-card p {
-        margin: 4px 0;
-        color: #5c6680;
-        font-size: 14px;
-    }
-
-    .status {
-        display: inline-block;
-        padding: 6px 10px;
-        border-radius: 10px;
-        font-size: 13px;
-        font-weight: bold;
-    }
-
-    .pending {
-        background: #fef3c7;
-        color: #92400e;
-    }
-
-    .approved {
-        background: #dcfce7;
-        color: #166534;
-    }
-
-    .rejected {
-        background: #fee2e2;
-        color: #991b1b;
-    }
-
-    .btn {
-        display: inline-block;
-        padding: 9px 14px;
-        border-radius: 10px;
-        text-decoration: none;
-        border: none;
-        cursor: pointer;
-        font-size: 14px;
-        margin-right: 6px;
-    }
-
-    .btn-soft {
-        background: #eef3ff;
-        color: #0f234a;
-        border: 1px solid #b7c7f0;
-    }
-
-    .btn-primary {
-        background: #ef4765;
-        color: white;
-    }
-
-    .btn-danger {
-        background: #ef4444;
-        color: white;
-    }
-
-    .btn-success {
-        background: #22c55e;
-        color: white;
-    }
-
-    .alert-success {
-        background: #dcfce7;
-        color: #166534;
-        padding: 10px;
-        border-radius: 10px;
-        margin-bottom: 14px;
-    }
-
-    .alert-error {
-        background: #fee2e2;
-        color: #991b1b;
-        padding: 10px;
-        border-radius: 10px;
-        margin-bottom: 14px;
-    }
-</style>
-
-<div class="refund-page">
-    <div class="refund-wrapper">
-        <div class="refund-header">
-            <div>
-                <h1>Booking Refund</h1>
-                <p>Halaman untuk melihat dan mengelola pengajuan refund tiket.</p>
-            </div>
-
-            <a href="{{ route('riwayat.index') }}" class="btn btn-soft">Riwayat Pemesanan</a>
-        </div>
-
-        @if (session('success'))
-            <div class="alert-success">{{ session('success') }}</div>
-        @endif
-
-        @if (session('error'))
-            <div class="alert-error">{{ session('error') }}</div>
-        @endif
-
-        @if ($refunds->isEmpty())
-            <p>Belum ada pengajuan refund.</p>
+<section class="hero-panel">
+    <h1>Booking Refund</h1>
+    <p>
+        @if(session('pengguna_role') === 'admin')
+            Admin dapat melihat semua pengajuan refund dan melakukan approve atau reject.
         @else
-            @foreach ($refunds as $refund)
-                <div class="refund-card">
-                    <h3>{{ $refund->booking->ticket->nama_konser ?? '-' }}</h3>
+            Daftar pengajuan refund milik akun kamu.
+        @endif
+    </p>
+</section>
 
-                    <p><strong>Tipe Tiket:</strong> {{ $refund->booking->ticket->tipe_ticket ?? '-' }}</p>
-                    <p><strong>Jumlah:</strong> {{ $refund->booking->kuantitas ?? '-' }}</p>
-                    <p><strong>Total Harga:</strong> Rp{{ number_format($refund->booking->total_harga ?? 0, 0, ',', '.') }}</p>
-                    <p><strong>Alasan:</strong> {{ $refund->alasan }}</p>
-                    <p><strong>Status:</strong>
-                        <span class="status {{ $refund->status }}">
-                            {{ ucfirst($refund->status) }}
-                        </span>
-                    </p>
+<section class="content-card">
+    <div class="section-head">
+        <div>
+            <h2>Data Pengajuan Refund</h2>
+            <p class="muted" style="margin:6px 0 0;">Refund diproses setelah booking berstatus paid.</p>
+        </div>
+        <a href="{{ route('riwayat.index') }}" class="btn btn-soft">Riwayat Pemesanan</a>
+    </div>
 
-                    @if ($refund->catatan_admin)
-                        <p><strong>Catatan Admin:</strong> {{ $refund->catatan_admin }}</p>
+    <div class="grid grid-2">
+        @forelse ($refunds as $refund)
+            <div class="ticket-card">
+                <div class="ticket-head">
+                    @if($refund->status === 'approved')
+                        <span class="badge green">Approved</span>
+                    @elseif($refund->status === 'rejected')
+                        <span class="badge red">Rejected</span>
+                    @else
+                        <span class="badge yellow">Pending</span>
                     @endif
 
-                    <div style="margin-top: 12px;">
-                        @if (session('pengguna_role') === 'admin' && $refund->status === 'pending')
+                    <h3>{{ $refund->booking?->ticket?->nama_konser ?? '-' }}</h3>
+                    <p>{{ $refund->booking?->ticket?->nama_artis ?? '-' }}</p>
+                </div>
+
+                <div class="ticket-body">
+                    @if(session('pengguna_role') === 'admin')
+                        <div class="info-row">
+                            <span>Pemesan</span>
+                            <span>{{ $refund->booking?->pengguna?->nama ?? $refund->pengguna?->nama ?? 'User ID: ' . $refund->pengguna_id }}</span>
+                        </div>
+                    @endif
+
+                    <div class="info-row"><span>Venue</span><span>{{ $refund->booking?->ticket?->venue?->nama_venue ?? '-' }}</span></div>
+                    <div class="info-row"><span>Tipe Tiket</span><span>{{ $refund->booking?->ticket?->tipe_ticket ?? '-' }}</span></div>
+                    <div class="info-row"><span>Jumlah</span><span>{{ $refund->booking?->kuantitas ?? '-' }} tiket</span></div>
+                    <div class="info-row"><span>Total Harga</span><span>Rp{{ number_format($refund->booking?->total_harga ?? 0, 0, ',', '.') }}</span></div>
+                    <div class="info-row"><span>Status Booking</span><span>{{ ucfirst($refund->booking?->status ?? '-') }}</span></div>
+
+                    <div style="margin-top:14px;">
+                        <strong>Alasan Refund:</strong>
+                        <p class="muted" style="margin:6px 0 0;">{{ $refund->alasan }}</p>
+                    </div>
+
+                    @if($refund->catatan_admin)
+                        <div style="margin-top:14px;">
+                            <strong>Catatan Admin:</strong>
+                            <p class="muted" style="margin:6px 0 0;">{{ $refund->catatan_admin }}</p>
+                        </div>
+                    @endif
+
+                    <div class="actions" style="margin-top:16px;">
+                        @if(session('pengguna_role') === 'admin' && $refund->status === 'pending')
                             <form action="{{ route('booking-refund.approve', $refund->id) }}" method="POST" style="display:inline;">
                                 @csrf
-                                <button class="btn btn-success">Approve</button>
+                                <button type="submit" class="btn btn-primary" onclick="return confirm('Setujui refund ini?')">
+                                    Approve Refund
+                                </button>
                             </form>
 
                             <form action="{{ route('booking-refund.reject', $refund->id) }}" method="POST" style="display:inline;">
                                 @csrf
-                                <button class="btn btn-danger">Reject</button>
+                                <button type="submit" class="btn btn-danger" onclick="return confirm('Tolak refund ini?')">
+                                    Reject Refund
+                                </button>
                             </form>
                         @endif
 
-                        @if (session('pengguna_role') !== 'admin' && $refund->status === 'pending')
+                        @if(session('pengguna_role') !== 'admin' && $refund->status === 'pending')
                             <form action="{{ route('booking-refund.destroy', $refund->id) }}" method="POST" style="display:inline;">
                                 @csrf
                                 @method('DELETE')
-                                <button class="btn btn-danger" onclick="return confirm('Batalkan pengajuan refund?')">Batalkan</button>
+                                <button type="submit" class="btn btn-danger" onclick="return confirm('Batalkan pengajuan refund?')">
+                                    Batalkan Refund
+                                </button>
                             </form>
                         @endif
                     </div>
                 </div>
-            @endforeach
-        @endif
+            </div>
+        @empty
+            <div class="empty-state">Belum ada pengajuan refund.</div>
+        @endforelse
     </div>
-</div>
+</section>
 @endsection
