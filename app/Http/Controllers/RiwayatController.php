@@ -8,9 +8,18 @@ class RiwayatController extends Controller
 {
     public function index()
     {
-        $riwayats = Booking::with(['ticket.venue', 'refund'])
-            ->orderBy('id', 'desc')
-            ->get();
+        if (!session('pengguna_id')) {
+            return redirect()->route('pengguna.login');
+        }
+
+        $query = Booking::with(['ticket.venue', 'refund', 'pengguna'])
+            ->orderBy('id', 'desc');
+
+        if (session('pengguna_role') !== 'admin') {
+            $query->where('user_id', session('pengguna_id'));
+        }
+
+        $riwayats = $query->get();
 
         return view('riwayat.index', compact('riwayats'));
     }
