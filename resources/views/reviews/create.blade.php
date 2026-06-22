@@ -1,39 +1,53 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Tambah Review</title>
-</head>
-<body>
+@extends('layouts.app')
+
+@section('title', 'Tambah Review')
+
+@section('content')
+<section class="hero-panel">
     <h1>Tambah Review</h1>
-    <a href="{{ route('reviews.index') }}">Kembali</a>
+    <p>Berikan penilaian untuk tiket konser yang dipilih.</p>
+</section>
+
+<section class="content-card">
+    <div class="section-head">
+        <div>
+            <h2>{{ $ticket->nama_konser }}</h2>
+            <p class="muted" style="margin:6px 0 0;">
+                {{ $ticket->nama_artis }} - {{ $ticket->venue?->nama_venue ?? '-' }}
+            </p>
+        </div>
+
+        <a href="{{ route('tickets.show', $ticket->id) }}" class="btn btn-soft">
+            Kembali ke Tiket
+        </a>
+    </div>
 
     <form action="{{ route('reviews.store') }}" method="POST">
         @csrf
-        <table>
-            <tr>
-                <td>Tiket</td>
-                <td>
-                    <select name="ticket_id">
-                        @foreach($tickets as $ticket)
-                            <option value="{{ $ticket->id }}">{{ $ticket->nama_konser }}</option>
-                        @endforeach
-                    </select>
-                </td>
-            </tr>
-            <tr>
-                <td>Nama Reviewer</td>
-                <td>{{ session('pengguna_nama') }}</td>
-            </tr>
-            <tr>
-                <td>Rating (1-5)</td>
-                <td><input type="number" name="rating" min="1" max="5"></td>
-            </tr>
-            <tr>
-                <td>Komentar</td>
-                <td><textarea name="komentar"></textarea></td>
-            </tr>
-        </table>
-        <button type="submit">Simpan</button>
+
+        <input type="hidden" name="ticket_id" value="{{ $ticket->id }}">
+
+        <div style="margin-bottom:16px;">
+            <label>Rating</label>
+            <select name="rating" required style="width:100%;padding:12px;border-radius:10px;border:1px solid #94a3b8;margin-top:8px;">
+                <option value="">Pilih rating</option>
+                <option value="5">5 - Sangat Bagus</option>
+                <option value="4">4 - Bagus</option>
+                <option value="3">3 - Cukup</option>
+                <option value="2">2 - Kurang</option>
+                <option value="1">1 - Buruk</option>
+            </select>
+        </div>
+
+        <div style="margin-bottom:16px;">
+            <label>Komentar</label>
+            <textarea name="komentar" rows="5" required placeholder="Tulis review kamu..."
+                style="width:100%;padding:12px;border-radius:10px;border:1px solid #94a3b8;margin-top:8px;">{{ old('komentar') }}</textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary">
+            Simpan Review
+        </button>
     </form>
-</body>
-</html>
+</section>
+@endsection
