@@ -81,7 +81,7 @@ class TicketController extends Controller
 
     public function show(Ticket $ticket)
     {
-        $ticket->load(['concert.artists', 'venue']);
+        $ticket->load(['concert.artists', 'venue', 'reviews']);
 
         $relatedTickets = Ticket::with(['concert.artists', 'venue'])
             ->where('concert_id', $ticket->concert_id)

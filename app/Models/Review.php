@@ -6,12 +6,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class Review extends Model
 {
-    protected $fillable = [
-        'ticket_id',
-        'nama_reviewer',
-        'rating',
-        'komentar',
-    ];
+protected $fillable = [
+    'ticket_id',
+    'user_id',
+    'nama_reviewer',
+    'rating',
+    'komentar',
+];
 
     public function ticket()
     {
