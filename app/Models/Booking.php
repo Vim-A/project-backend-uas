@@ -23,4 +23,9 @@ class Booking extends Model
     {
         return $this->hasOne(BookingRefund::class);
     }
+
+    public function pengguna()
+    {
+        return $this->belongsTo(Pengguna::class, 'user_id');
+    }
 }
