@@ -19,7 +19,12 @@ class BookingController extends Controller
 
     public function index()
     {
-        $query = Booking::with(['ticket.concert.artists', 'ticket.venue'])->latest();
+        if ($redirect = $this->requireLogin()) {
+            return $redirect;
+        }
+
+        $query = Booking::with(['ticket.concert.artists', 'ticket.venue', 'refund', 'pengguna'])
+            ->orderBy('id', 'desc');
 
         if (session('pengguna_role') !== 'admin') {
             $query->where('user_id', session('pengguna_id'));
@@ -77,7 +82,15 @@ class BookingController extends Controller
 
     public function show(string $id)
     {
-        $booking = Booking::with(['ticket.concert.artists', 'ticket.venue'])->findOrFail($id);
+        if ($redirect = $this->requireLogin()) {
+            return $redirect;
+        }
+
+        $booking = Booking::with(['ticket.concert.artists', 'ticket.venue', 'refund', 'pengguna'])->findOrFail($id);
+
+        if (session('pengguna_role') !== 'admin' && $booking->user_id !== session('pengguna_id')) {
+            abort(403);
+        }
 
         return view('booking.show', compact('booking'));
     }
@@ -94,7 +107,16 @@ class BookingController extends Controller
 
     public function destroy(string $id)
     {
+        if ($redirect = $this->requireLogin()) {
+            return $redirect;
+        }
+
         $booking = Booking::findOrFail($id);
+
+        if (session('pengguna_role') !== 'admin' && $booking->user_id !== session('pengguna_id')) {
+            abort(403);
+        }
+
         $booking->delete();
 
         return redirect()->route('booking.index')->with('success', 'Booking berhasil dihapus.');

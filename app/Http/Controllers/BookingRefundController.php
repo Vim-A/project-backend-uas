@@ -8,43 +8,44 @@ use Illuminate\Http\Request;
 
 class BookingRefundController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
         if (!session('pengguna_id')) {
             return redirect()->route('pengguna.login');
         }
 
-        if (session('pengguna_role') === 'admin') {
-            $refunds = BookingRefund::with(['booking.ticket', 'pengguna'])
-                ->latest()
-                ->get();
-        } else {
-            $refunds = BookingRefund::with(['booking.ticket', 'pengguna'])
-                ->where('pengguna_id', session('pengguna_id'))
-                ->latest()
-                ->get();
+        $query = BookingRefund::with(['booking.ticket.venue', 'booking.pengguna', 'pengguna'])
+            ->orderBy('id', 'desc');
+
+        if (session('pengguna_role') !== 'admin') {
+            $query->whereHas('booking', function ($booking) {
+                $booking->where('user_id', session('pengguna_id'));
+            });
         }
+
+        $refunds = $query->get();
 
         return view('booking_refunds.index', compact('refunds'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create(Request $request)
     {
         if (!session('pengguna_id')) {
             return redirect()->route('pengguna.login');
         }
 
-        $booking = Booking::with('ticket')->findOrFail($request->booking_id);
+        $booking = Booking::with(['ticket.venue', 'refund'])->findOrFail($request->booking_id);
 
-        $sudahAdaRefund = BookingRefund::where('booking_id', $booking->id)->exists();
+        if (session('pengguna_role') !== 'admin' && $booking->user_id !== session('pengguna_id')) {
+            abort(403);
+        }
 
-        if ($sudahAdaRefund) {
+        if ($booking->status !== 'paid') {
+            return redirect()->route('booking.index')
+                ->with('error', 'Refund hanya bisa diajukan setelah booking berstatus paid.');
+        }
+
+        if ($booking->refund) {
             return redirect()->route('booking-refund.index')
                 ->with('error', 'Refund untuk booking ini sudah pernah diajukan.');
         }
@@ -52,9 +53,6 @@ class BookingRefundController extends Controller
         return view('booking_refunds.create', compact('booking'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
         if (!session('pengguna_id')) {
@@ -66,16 +64,25 @@ class BookingRefundController extends Controller
             'alasan' => 'required|min:5',
         ]);
 
-        $sudahAdaRefund = BookingRefund::where('booking_id', $request->booking_id)->exists();
+        $booking = Booking::with('refund')->findOrFail($request->booking_id);
 
-        if ($sudahAdaRefund) {
+        if (session('pengguna_role') !== 'admin' && $booking->user_id !== session('pengguna_id')) {
+            abort(403);
+        }
+
+        if ($booking->status !== 'paid') {
+            return redirect()->route('booking.index')
+                ->with('error', 'Refund hanya bisa diajukan setelah booking berstatus paid.');
+        }
+
+        if ($booking->refund) {
             return redirect()->route('booking-refund.index')
                 ->with('error', 'Refund untuk booking ini sudah pernah diajukan.');
         }
 
         BookingRefund::create([
-            'booking_id' => $request->booking_id,
-            'pengguna_id' => session('pengguna_id'),
+            'booking_id' => $booking->id,
+            'pengguna_id' => $booking->user_id,
             'alasan' => $request->alasan,
             'status' => 'pending',
         ]);
@@ -90,7 +97,11 @@ class BookingRefundController extends Controller
             return redirect()->back()->with('error', 'Akses hanya untuk admin.');
         }
 
-        $refund = BookingRefund::with('booking')->findOrFail($id);
+        $refund = BookingRefund::with(['booking.ticket'])->findOrFail($id);
+
+        if ($refund->status !== 'pending') {
+            return redirect()->back()->with('error', 'Refund ini sudah diproses.');
+        }
 
         $refund->update([
             'status' => 'approved',
@@ -101,6 +112,10 @@ class BookingRefundController extends Controller
             $refund->booking->update([
                 'status' => 'refunded',
             ]);
+
+            if ($refund->booking->ticket) {
+                $refund->booking->ticket->increment('stock', $refund->booking->kuantitas);
+            }
         }
 
         return redirect()->back()->with('success', 'Refund berhasil disetujui.');
@@ -114,6 +129,10 @@ class BookingRefundController extends Controller
 
         $refund = BookingRefund::findOrFail($id);
 
+        if ($refund->status !== 'pending') {
+            return redirect()->back()->with('error', 'Refund ini sudah diproses.');
+        }
+
         $refund->update([
             'status' => 'rejected',
             'catatan_admin' => 'Refund ditolak oleh admin.',
@@ -122,18 +141,21 @@ class BookingRefundController extends Controller
         return redirect()->back()->with('success', 'Refund berhasil ditolak.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy($id)
     {
         if (!session('pengguna_id')) {
             return redirect()->route('pengguna.login');
         }
 
-        $refund = BookingRefund::where('id', $id)
-            ->where('pengguna_id', session('pengguna_id'))
-            ->firstOrFail();
+        $query = BookingRefund::with('booking')->where('id', $id);
+
+        if (session('pengguna_role') !== 'admin') {
+            $query->whereHas('booking', function ($booking) {
+                $booking->where('user_id', session('pengguna_id'));
+            });
+        }
+
+        $refund = $query->firstOrFail();
 
         if ($refund->status !== 'pending') {
             return redirect()->back()->with('error', 'Refund yang sudah diproses tidak bisa dibatalkan.');
