@@ -49,8 +49,9 @@
         <div class="field">
             <label>Tipe Ticket</label>
             <select name="tipe_ticket" required>
-                <option value="Regular">Regular</option>
+                <option value="Reguler">Reguler</option>
                 <option value="VIP">VIP</option>
+                <option value="Festival">Festival</option>
             </select>
         </div>
 
