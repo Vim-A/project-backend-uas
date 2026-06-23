@@ -12,7 +12,7 @@ class RiwayatController extends Controller
             return redirect()->route('pengguna.login');
         }
 
-        $query = Booking::with(['ticket.venue', 'refund', 'pengguna'])
+        $query = Booking::with(['ticket.venue', 'ticket.reviews', 'refund', 'pengguna'])
             ->orderBy('id', 'desc');
 
         if (session('pengguna_role') !== 'admin') {
