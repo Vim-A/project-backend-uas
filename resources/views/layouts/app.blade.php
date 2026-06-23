@@ -413,6 +413,7 @@
                 <a href="{{ route('riwayat.index') }}">History</a>
                 <a href="{{ route('wishlist.index') }}">Wishlist</a>
                 @if(session('pengguna_role') === 'admin')
+                    <a href="{{ route('venues.index') }}">Venue</a>
                     <a href="{{ route('booking-refund.index') }}">Refund</a>
                 @endif
                 <a href="{{ route('gallery.index') }}">Gallery</a>
