@@ -78,6 +78,16 @@
                     <td>
                         <div class="actions">
                             <a href="{{ route('booking.show', $riwayat->id) }}" class="btn btn-soft">Detail</a>
+                            @if($riwayat->ticket?->reviews->count() > 0)
+                                <button
+                                    type="button"
+                                    class="btn btn-soft"
+                                    onclick="toggleReview('review-{{ $riwayat->id }}')"
+                                >
+                                    Lihat Review
+                                </button>
+                            @endif
+
 
                             @if(session('pengguna_role') === 'admin')
                                 @if($riwayat->refund && $riwayat->refund->status === 'pending')
@@ -96,6 +106,11 @@
                                     </form>
                                 @endif
                             @else
+                                @if($riwayat->status === 'paid')
+                                    <a href="{{ route('reviews.create', ['ticket_id' => $riwayat->ticket_id]) }}" class="btn btn-primary" style="background-color: #28a745; border-color: #28a745;">
+                                        Beri Review
+                                    </a>
+                            @endif
                                 @if(!$riwayat->refund && $riwayat->status === 'paid')
                                     <a href="{{ route('booking-refund.create', ['booking_id' => $riwayat->id]) }}" class="btn btn-primary">
                                         Ajukan Refund
@@ -109,6 +124,19 @@
                         </div>
                     </td>
                 </tr>
+                  @if($riwayat->ticket?->reviews->count() > 0)
+                    <tr id="review-{{ $riwayat->id }}" style="display:none;">
+                        <td colspan="{{ session('pengguna_role') === 'admin' ? 9 : 8 }}" style="background:#f8fafc;padding:16px;">
+                            <strong style="display:block;margin-bottom:10px;">Review untuk {{ $riwayat->ticket->nama_konser }}</strong>
+                            @foreach($riwayat->ticket->reviews as $review)
+                                <div style="background:white;border:1px solid #d7def0;border-radius:10px;padding:12px;margin-bottom:8px;">
+                                    <span style="font-weight:600;">Rating: {{ $review->rating }}/5</span>
+                                    <p style="margin:6px 0 0;color:#475569;">{{ $review->komentar }}</p>
+                                </div>
+                            @endforeach
+                        </td>
+                    </tr>
+                @endif
             @empty
                 <tr>
                     <td colspan="{{ session('pengguna_role') === 'admin' ? 9 : 8 }}">Belum ada riwayat pemesanan.</td>
@@ -117,4 +145,11 @@
         </table>
     </div>
 </section>
+
+<script>
+function toggleReview(id) {
+    const row = document.getElementById(id);
+    row.style.display = row.style.display === 'none' ? 'table-row' : 'none';
+}
+</script>
 @endsection

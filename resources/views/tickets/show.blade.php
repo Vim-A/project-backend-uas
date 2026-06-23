@@ -33,35 +33,9 @@
 
 <section class="content-card">
     <div class="section-head">
-        <div>
-            <h2>Review Tiket</h2>
-            <p class="muted" style="margin:6px 0 0;">
-                Review pengguna untuk tiket ini.
-            </p>
-        </div>
-
-        <a href="{{ route('reviews.create', ['ticket_id' => $ticket->id]) }}" class="btn btn-primary">
-            Beri Review
-        </a>
-    </div>
-
-    @forelse ($ticket->reviews as $review)
-        <div style="background:white;border:1px solid #d7def0;border-radius:12px;padding:16px;margin-bottom:12px;">
-            <h3 style="margin:0 0 8px;">Rating: {{ $review->rating }}/5</h3>
-            <p style="margin:0;color:#475569;">{{ $review->komentar }}</p>
-        </div>
-    @empty
-        <p>Belum ada review untuk tiket ini.</p>
-    @endforelse
-</section>
-
-<section class="content-card">
-    <div class="section-head">
         <h2>Kategori Tiket Konser Ini</h2>
     </div>
 
-<a href="{{ route('reviews.create', ['ticket_id' => $ticket->id]) }}" class="btn btn-primary">
-    Beri Review
 </a>
 
     <div class="table-wrap">

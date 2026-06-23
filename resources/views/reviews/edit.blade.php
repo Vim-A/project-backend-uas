@@ -1,42 +1,54 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Edit Review</title>
-</head>
-<body>
-    <h1>Edit Review</h1>
-    <a href="{{ route('reviews.index') }}">Kembali</a>
+@extends('layouts.app')
 
-    <form action="{{ route('reviews.update', $review->id) }}" method="POST">
+@section('title', 'Edit')
+
+@section('content')
+<section class="hero-panel">
+    <h1>Edit Review</h1>
+    <p>perbarui rating dan komentar review kamu</p>
+</section>
+
+<section class="content-card">
+    <div class="section-head">
+        <div>
+            <h2>{{ $review->ticket?->nama_konser ?? '-' }}</h2>
+            <p class="muted" style="margin:6px 0 0;">{{ $review->ticket?->nama_artis ?? '-' }}</p>
+        </div>
+        <a href="{{ route('reviews.index') }}" class="btn btn-soft">back</a>
+    </div>
+
+    @if ($errors->any())
+        <div style="background:#fee2e2;color:#991b1b;padding:12px;border-radius:10px;margin-bottom:16px;">
+            <ul style="margin:0;padding-left:16px;">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
+    <form action="{{ route('reviews.update', $review->id) }}" method="POST" style="margin-top:8px;">
         @csrf
         @method('PUT')
-        <table>
-            <tr>
-                <td>Tiket</td>
-                <td>
-                    <select name="ticket_id">
-                        @foreach($tickets as $ticket)
-                            <option value="{{ $ticket->id }}" {{ $review->ticket_id == $ticket->id ? 'selected' : '' }}>
-                                {{ $ticket->nama_konser }}
-                            </option>
-                        @endforeach
-                    </select>
-                </td>
-            </tr>
-            <tr>
-                <td>Nama Reviewer</td>
-                <td><input type="text" name="nama_reviewer" value="{{ $review->nama_reviewer }}"></td>
-            </tr>
-            <tr>
-                <td>Rating (1-5)</td>
-                <td><input type="number" name="rating" min="1" max="5" value="{{ $review->rating }}"></td>
-            </tr>
-            <tr>
-                <td>Komentar</td>
-                <td><textarea name="komentar">{{ $review->komentar }}</textarea></td>
-            </tr>
-        </table>
-        <button type="submit">Update</button>
+
+        <div style="margin-bottom:16px;">
+            <label style="display:block;margin-bottom:6px;font-weight:500;">Rating</label>
+            <select name="rating" style="width:100%;padding:10px;border:1px solid #d7def0;border-radius:8px;">
+                @for ($i = 1; $i <= 5; $i++)
+                    <option value="{{ $i }}" {{ $review->rating == $i ? 'selected' : '' }}>{{ $i }}</option>
+                @endfor
+            </select>
+        </div>
+
+        <div style="margin-bottom:16px;">
+            <label style="display:block;margin-bottom:6px;font-weight:500;">Komentar</label>
+            <textarea name="komentar" rows="4" style="width:100%;padding:10px;border:1px solid #d7def0;border-radius:8px;resize:vertical;">{{ old('komentar', $review->komentar) }}</textarea>
+        </div>
+
+        <div class="actions">
+            <button type="submit" class="btn btn-primary">Simpan</button>
+            <a href="{{ route('reviews.index') }}" class="btn btn-soft">Batal</a>
+        </div>
     </form>
-</body>
-</html>
+</section>
+@endsection

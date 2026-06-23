@@ -13,7 +13,7 @@
         <div>
             <h2>Data Review</h2>
             <p class="muted" style="margin:6px 0 0;">
-                Review terhubung dengan data tiket.
+                Review terhubung dengan data tiket yang pernah anda tonton
             </p>
         </div>
     </div>
